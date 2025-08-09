@@ -14,3 +14,7 @@ desktop.ini
 *.lnk
 Thumbs.db
 .DS_Store
+# IDE
+.idea/
+*.iml
+.vscode/
