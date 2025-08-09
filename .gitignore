@@ -1,0 +1,16 @@
+# Секреты
+.env
+.env.local
+
+# Виртуальное окружение
+venv/
+__pycache__/
+*.pyc
+
+# Логи
+*.log
+# Системные файлы Windows
+desktop.ini
+*.lnk
+Thumbs.db
+.DS_Store
