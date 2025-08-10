@@ -215,5 +215,6 @@ def handle_streamer_name(message):
 # print(get_streamer_info(username="whylollycry", TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN))
 # print(get_last_vod(user_id=490666905, TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN))
 
-bot.polling(none_stop=True)
+if __name__ == "__main__":
+    bot.polling(none_stop=True, interval=0, timeout=20)
 
