@@ -218,8 +218,8 @@ def handle_streamer_name(message):
 # print(get_last_vod(user_id=490666905, TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN))
 
 if __name__ == "__main__":
+    bot.remove_webhook()
     if os.getenv("ENV") == "production":
-        bot.remove_webhook()
         url =os.getenv("NETWORK")
         bot.set_webhook(url= url)
     else:
