@@ -126,6 +126,7 @@ def handle_streamer_name(message):
         return
 
     user = streamer_data['data'][0]
+    print(user)
     user_id = user['id']
     user_login = user['login']
     display_name = user['display_name']
@@ -143,6 +144,7 @@ def handle_streamer_name(message):
     # Формируем ответ
     if is_live:
         stream = stream_data['data'][0]
+        print(stream)
         viewers = f"{stream['viewer_count']:,}".replace(",", " ")
         game = stream['game_name']
         title = stream['title']
@@ -216,5 +218,11 @@ def handle_streamer_name(message):
 # print(get_last_vod(user_id=490666905, TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN))
 
 if __name__ == "__main__":
-    bot.polling(none_stop=True, interval=0, timeout=20)
+    if os.getenv("ENV") == "production":
+        bot.remove_webhook()
+        url =os.getenv("NETWORK")
+        bot.set_webhook(url= url)
+    else:
+        bot.polling(none_stop=True)
+
 
