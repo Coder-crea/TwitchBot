@@ -135,7 +135,7 @@ def handle_streamer_name(message):
     # view_count = f"{user['view_count']:,}".replace(',', ' ')
 
     # Проверяем, онлайн ли
-    stream_data = get_stream_info(streamer_user_id= user_id, TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN)
+    stream_data = STREAMER.get_stream_info(streamer_id= STREAMER.streamer_id, TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN)
     is_live = bool(stream_data.get('data'))
 
     # Получаем последний VOD
