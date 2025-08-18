@@ -30,13 +30,14 @@ class Streamer:
 
         if response.json().get('data'):
             info = response.json()["data"][0]
+            print(info)
             self.streamer_id = info['id'] if info.get('id') else None
             self.streamer_login = info['login'] if info.get('login') else None
             self.streamer_display_name = info['display_name'] if info.get('display_name') else None
             self.streamer_description = info['description'] if info.get('description') else None
             self.streamer_was_created = format_twitch_date(info["created_at"] if info.get('created_at') else None)
-            self.photo_online= info.get('profile_image_url') if info.get('profile_image_url') else "Error image",
-            self.photo_offline = info.get('offline_image_url') if info.get('offline_image_url') else "Error image"
+            self.photo_online = (info.get('profile_image_url') or "Error image").strip()
+            self.photo_offline = (info.get('offline_image_url') or "Error image").strip()
         return response.json()
 
 

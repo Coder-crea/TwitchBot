@@ -72,13 +72,8 @@ def callback_inline(call):
 
     bot.answer_callback_query(callback_query_id=call.id, text="Действие выполнено")
 
-#test
-# STr = Streamer("anarabdullaev")
-# STr.get_streamer_info(streamer_name="anarabdullaev", TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN)
-# STr.get_stream_info(streamer_id= STr.streamer_id, TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN)
-# print()
-# print(STr.stream)
-# # print(STr.stream["photo_offline"])
+
+
 
 @bot.message_handler(func=lambda message: True)
 def handle_streamer_name(message):
@@ -159,12 +154,12 @@ def handle_streamer_name(message):
         bot.send_message(message.chat.id, "📌 У стримера пока нет записей стримов.")
 
 
-# bot.polling(none_stop=True)
-if __name__ == "__main__":
-    bot.remove_webhook()
-    if os.getenv("ENV") == "production":
-        url =os.getenv("NETWORK")
-        bot.set_webhook(url= url)
-    else:
-        bot.polling(none_stop=True)
+bot.polling(none_stop=True)
+# if __name__ == "__main__":
+#     bot.remove_webhook()
+#     if os.getenv("ENV") == "production":
+#         url =os.getenv("NETWORK")
+#         bot.set_webhook(url= url)
+#     else:
+#         bot.polling(none_stop=True)
 
