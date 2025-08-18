@@ -159,12 +159,12 @@ def handle_streamer_name(message):
         bot.send_message(message.chat.id, "📌 У стримера пока нет записей стримов.")
 
 
-bot.polling(none_stop=True)
-# if __name__ == "__main__":
-#     bot.remove_webhook()
-#     if os.getenv("ENV") == "production":
-#         url =os.getenv("NETWORK")
-#         bot.set_webhook(url= url)
-#     else:
-#         bot.polling(none_stop=True)
+# bot.polling(none_stop=True)
+if __name__ == "__main__":
+    bot.remove_webhook()
+    if os.getenv("ENV") == "production":
+        url =os.getenv("NETWORK")
+        bot.set_webhook(url= url)
+    else:
+        bot.polling(none_stop=True)
 
