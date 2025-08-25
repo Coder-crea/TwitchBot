@@ -23,3 +23,4 @@ def format_twitch_date(iso_string):
         return dt.strftime("%d.%m.%Y в %H:%M")
     except ValueError:
         return "неверный формат даты"
+

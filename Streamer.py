@@ -1,9 +1,9 @@
+from xml.dom.minidom import ProcessingInstruction
+
 import requests
 from Auxiliary_functions import format_twitch_date
 
-
 class Streamer:
-
 
     def __init__(self, streamer_name):
         self.streamer_name = streamer_name
@@ -30,7 +30,7 @@ class Streamer:
 
         if response.json().get('data'):
             info = response.json()["data"][0]
-            print(info)
+            # print(info)
             self.streamer_id = info['id'] if info.get('id') else None
             self.streamer_login = info['login'] if info.get('login') else None
             self.streamer_display_name = info['display_name'] if info.get('display_name') else None

@@ -5,7 +5,14 @@ from Auxiliary_functions import get_twitch_token, format_twitch_date
 from dotenv import load_dotenv
 from Streamer import Streamer
 from data_base import save_user_to_db
+
 load_dotenv()
+
+
+# TODO: Убрать после теста
+# FIXME: Временное решение
+# HACK: Костыль, переделать
+
 
 TWITCH_CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
 TWITCH_CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
@@ -16,13 +23,13 @@ if not all([TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TELEGRAM_BOT_TOKEN]):
 
 
 # Получаем Twitch токен
+
 try:
     TWITCH_ACCESS_TOKEN = get_twitch_token(TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET=TWITCH_CLIENT_SECRET)
     print("Twitch access token получен")
 except Exception as e:
     print(e)
     exit()
-
 
 
 #Создаём бота
@@ -121,13 +128,26 @@ def handle_streamer_name(message):
     Канал был создан: {STREAMER.streamer_was_created}
         """
 
+
+
     # Отправляем фото + текст
     if is_live and STREAMER.photo_online != "Error image":
-        bot.send_photo(message.chat.id, STREAMER.photo_online, caption=reply, parse_mode='HTML')
+        try:
+            bot.send_photo(message.chat.id, STREAMER.photo_online, caption=reply, parse_mode='HTML')
+        except Exception as e:
+            bot.send_message(message.chat.id, f"Ошибка отправки фото: {e}")
+
     elif not is_live and STREAMER.photo_offline != "Error image":
-        bot.send_photo(message.chat.id, STREAMER.photo_offline, caption=reply, parse_mode='HTML')
+        try:
+            bot.send_photo(message.chat.id, STREAMER.photo_offline, caption=reply, parse_mode='HTML')
+        except  Exception as e:
+            bot.send_message(message.chat.id, f"Ошибка отправки фото: {e}")
+
     else:
-        bot.send_message(message.chat.id, reply, parse_mode="HTML")
+        try:
+            bot.send_message(message.chat.id, reply, parse_mode="HTML")
+        except Exception as e:
+            bot.send_message(message.chat.id, f"Ошибка отправки фото: {e}")
 
 
 
