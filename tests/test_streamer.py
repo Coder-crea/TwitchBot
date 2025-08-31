@@ -1,4 +1,4 @@
-from Streamer import Streamer
+from Streamers import Streamer
 from Auxiliary_functions import get_twitch_token
 import os
 from dotenv import load_dotenv

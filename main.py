@@ -1,10 +1,17 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 import os
-from Auxiliary_functions import get_twitch_token, format_twitch_date
+from Auxiliary_functions import get_twitch_token, get_streamer_name_by_caption
 from dotenv import load_dotenv
-from Streamer import Streamer
-from data_base import save_user_to_db
+from Streamers import Streamer
+from data_base import save_user_to_db, subscribe_user_to_streamer, get_subscribers
+import logging
+from Notify_System import check_streamers
+
+
+
+logging.basicConfig(level=logging.INFO)
+
 
 load_dotenv()
 
@@ -53,33 +60,33 @@ def send_welcome(message):
     """, parse_mode='HTML', reply_markup=markup)
 
 
+
+
+
+
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     if call.message:
-        if call.data == "support":
-            message = "Поддерживая проект, вы попадаете в эксклюзивный список спонсоров, у которых есть премиальные возможности"
-            photo_donate = "https://lfb.su/assets/components/phpthumbof/cache/EP_9164.5829e9bb4bbfce8e8b20161f14bb89752225.png"
-            ways_for_pay = {
-                "Boosty": {"url": "https://twitch-analitics-bot-web.vercel.app/"},
-                "Telegram-stars": {"url": "https://twitch-analitics-bot-web.vercel.app/"},
-                "СБП": {"url": "https://twitch-analitics-bot-web.vercel.app/"},
-            }
-            markup = InlineKeyboardMarkup()
-            for way in ways_for_pay:
-                btn = InlineKeyboardButton(way, url=ways_for_pay[way]['url'])
-                markup.add(btn)
-            bot.send_photo(call.message.chat.id, photo=photo_donate, caption=message, reply_markup=markup)
+        if call.data == "subscribe":
+            try:
+                streamer_name = get_streamer_name_by_caption(caption=call.message.caption)
+            except  Exception as e:
+                logging.warning("Ошибка получения информации об имени стримера")
+                bot.send_message(call.message.chat.id, f"Ошибка получения информации, а точнее имени стримера. Подробнее: {e}")
 
+            if streamer_name:
+                success = subscribe_user_to_streamer(user_id=call.from_user.id, streamer_login=streamer_name)
+                if success:
+                    check_streamers(bot, TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN)
+                    bot.send_message(call.message.chat.id, f"✅ Вы успешно подписались на {streamer_name}")
 
-        elif call.data == "Boosty":
-            bot.send_message(call.message.chat.id, "Вы выбрали Boosty")
+                else:
+                    bot.send_message(call.message.chat.id, "❌ Ошибка при подписке")
+            else:
+                logging.error("❌ Пустое имя стримера")
 
-        elif call.data == "Telegram-stars":
-            bot.send_message(call.message.chat.id, "Вы выбрали Telegram-stars")
 
     bot.answer_callback_query(callback_query_id=call.id, text="Действие выполнено")
-
-
 
 
 @bot.message_handler(func=lambda message: True)
@@ -129,23 +136,27 @@ def handle_streamer_name(message):
         """
 
 
+    subscribe = InlineKeyboardMarkup()
+    button = InlineKeyboardButton(text='Подписаться', callback_data="subscribe")
+    subscribe.add(button)
+
 
     # Отправляем фото + текст
     if is_live and STREAMER.photo_online != "Error image":
         try:
-            bot.send_photo(message.chat.id, STREAMER.photo_online, caption=reply, parse_mode='HTML')
+            bot.send_photo(message.chat.id, STREAMER.photo_online, caption=reply, parse_mode='HTML', reply_markup= subscribe )
         except Exception as e:
             bot.send_message(message.chat.id, f"Ошибка отправки фото: {e}")
 
     elif not is_live and STREAMER.photo_offline != "Error image":
         try:
-            bot.send_photo(message.chat.id, STREAMER.photo_offline, caption=reply, parse_mode='HTML')
+            bot.send_photo(message.chat.id, STREAMER.photo_offline, caption=reply, parse_mode='HTML', reply_markup= subscribe)
         except  Exception as e:
             bot.send_message(message.chat.id, f"Ошибка отправки фото: {e}")
 
     else:
         try:
-            bot.send_message(message.chat.id, reply, parse_mode="HTML")
+            bot.send_message(message.chat.id, reply, parse_mode="HTML", reply_markup= subscribe)
         except Exception as e:
             bot.send_message(message.chat.id, f"Ошибка отправки фото: {e}")
 
@@ -175,11 +186,5 @@ def handle_streamer_name(message):
 
 
 bot.polling(none_stop=True)
-# if __name__ == "__main__":
-#     bot.remove_webhook()
-#     if os.getenv("ENV") == "production":
-#         url =os.getenv("NETWORK")
-#         bot.set_webhook(url= url)
-#     else:
-#         bot.polling(none_stop=True)
+
 

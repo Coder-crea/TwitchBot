@@ -1,5 +1,7 @@
 import requests
 from datetime import datetime
+import logging
+
 
 def get_twitch_token(*,TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET):
     url= "https://id.twitch.tv/oauth2/token"
@@ -23,4 +25,9 @@ def format_twitch_date(iso_string):
         return dt.strftime("%d.%m.%Y в %H:%M")
     except ValueError:
         return "неверный формат даты"
+
+
+def get_streamer_name_by_caption(*, caption:str)->str:
+    return caption.split(" ")[1]
+
 
