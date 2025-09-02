@@ -1,12 +1,14 @@
+from xml.dom.minidom import ProcessingInstruction
+
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 import os
-from Auxiliary_functions import get_twitch_token, get_streamer_name_by_caption
+from Auxiliary_functions import get_twitch_token, get_streamer_name_by_caption, get_text_for_message_of_subscribes
 from dotenv import load_dotenv
 from Streamers import Streamer
-from data_base import save_user_to_db, subscribe_user_to_streamer, get_subscribers
+from data_base import save_user_to_db, subscribe_user_to_streamer, get_all_followed_streamers_by_user, unsubscribe_user
 import logging
-from Notify_System import check_streamers
+from Notify_System import start_background_check
 
 
 
@@ -60,6 +62,29 @@ def send_welcome(message):
     """, parse_mode='HTML', reply_markup=markup)
 
 
+@bot.message_handler(commands=['subscribes'])
+def send_welcome(message):
+    user = message.from_user
+    all_followed_streamers_by_user = get_all_followed_streamers_by_user(user.id)
+
+    caption = get_text_for_message_of_subscribes(all_followed_streamers_by_user)
+
+    bot.reply_to(message, caption, parse_mode='HTML')
+
+
+@bot.message_handler(commands=['unsubscribe'])
+def send_welcome(message):
+    text = message.text.strip()
+    parts = text.split()
+    if len(parts) < 2:
+        bot.reply_to(message, "❌ Укажите имя стримера: /unsubscribe xqc", parse_mode='HTML')
+        return
+    streamer_login = parts[1].strip()
+    user_id = message.from_user.id
+    unsubscribe_user(user_id, streamer_login)
+
+    bot.reply_to(message, f"✅ Вы отписаны от <b>{streamer_login}</b>", parse_mode='HTML')
+
 
 
 
@@ -77,9 +102,7 @@ def callback_inline(call):
             if streamer_name:
                 success = subscribe_user_to_streamer(user_id=call.from_user.id, streamer_login=streamer_name)
                 if success:
-                    check_streamers(bot, TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN)
                     bot.send_message(call.message.chat.id, f"✅ Вы успешно подписались на {streamer_name}")
-
                 else:
                     bot.send_message(call.message.chat.id, "❌ Ошибка при подписке")
             else:
@@ -112,6 +135,9 @@ def handle_streamer_name(message):
     stream_data = STREAMER.get_stream_info(streamer_id= STREAMER.streamer_id, TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN)
     is_live = bool(stream_data.get('data'))
 
+    print(f"login {STREAMER.streamer_login}, id: {STREAMER.streamer_id}, name: {STREAMER.streamer_name}")
+
+
 
     # Формируем ответ
     if is_live:
@@ -128,7 +154,7 @@ def handle_streamer_name(message):
         """
     else:
         reply = f"""
-📊 <b>{STREAMER.streamer_display_name}</b> — 🟢 Оффлайн
+📊 <b>{STREAMER.streamer_name}</b> — 🟢 Оффлайн
 
 📌 <code>{STREAMER.streamer_description}</code>
 
@@ -165,9 +191,6 @@ def handle_streamer_name(message):
     # Получаем последний VOD
     vod = STREAMER.get_last_vod( streamer_id=STREAMER.streamer_id, TWITCH_CLIENT_ID=TWITCH_CLIENT_ID, TWITCH_ACCESS_TOKEN=TWITCH_ACCESS_TOKEN)
 
-
-
-    # Если есть VOD — предлагаем скачать
     if vod:
         bot.send_message(
             message.chat.id,
@@ -184,7 +207,6 @@ def handle_streamer_name(message):
     else:
         bot.send_message(message.chat.id, "📌 У стримера пока нет записей стримов.")
 
-
-bot.polling(none_stop=True)
-
-
+if __name__=="__main__":
+    start_background_check(bot,TWITCH_CLIENT_ID,TWITCH_ACCESS_TOKEN)
+    bot.polling(none_stop=True)

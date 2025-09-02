@@ -80,16 +80,49 @@ def get_subscribers(streamer_login: str):
         logging.error(f"Ошибка при получении подписчиков: {e}")
         return []
 
-# необходимо за счет set убрать повторяещиеся элементы
+
 def get_all_subscribed_streamers():
     try:
         response = supabase.table("subscriptions") \
         .select("streamer_login") \
         .execute()
-        return [row["streamer_login"] for row in response.data]
+        all_streamers = [row["streamer_login"] for row in response.data]
+        unique_name_streamers = set(all_streamers)
+        return unique_name_streamers
     except Exception as e:
         logging.error(f"Ошибка при получении всех стримеров из бд: {e}")
         return []
 
 
+def was_streamer_live_before(streamer_login):
+    try:
+        response = supabase.table("streamer_status") \
+        .select("is_live") \
+        .eq("streamer_login", streamer_login.lower()) \
+        .execute()
+        if response.data:
+            return response.data[0]["is_live"]
+        return False
+    except Exception as e:
+        print(f"Ошибка при проверке предыдущего статуса {streamer_login}: {e}")
+        return False
 
+def update_streamer_status(streamer_login, is_live):
+    try:
+        supabase.table("streamer_status").upsert({
+            "streamer_login": streamer_login.lower(),
+            "is_live": is_live
+        }).execute()
+    except Exception as e:
+        print(f"Ошибка при обновлении статуса {streamer_login}: {e}")
+
+
+def get_all_followed_streamers_by_user(user_id):
+    try:
+        response = supabase.table("subscriptions") \
+        .select("streamer_login") \
+        .eq("user_id", user_id) \
+        .execute()
+        return [row["streamer_login"] for row in response.data]
+    except Exception as e:
+        print(f"Ошибка получения подписок пользователя: {e}")

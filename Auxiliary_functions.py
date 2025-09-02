@@ -31,3 +31,10 @@ def get_streamer_name_by_caption(*, caption:str)->str:
     return caption.split(" ")[1]
 
 
+def get_text_for_message_of_subscribes(all_followed_streamers_by_user):
+    if not all_followed_streamers_by_user:
+        return "📭 Вы не подписаны ни на одного стримера.\nОтправьте ник стримера, чтобы подписаться"
+
+    # Делаем каждый ник жирным через HTML
+    formatted_streamers = [f"{i+1}.<b>{streamer}</b>" for i, streamer in enumerate(all_followed_streamers_by_user)]
+    return "Вы подписаны на:\n" + "\n".join(formatted_streamers) + "\nЧтобы отписаться введите команду /unsubscribe имя_стримера" #join может итерировать объект??????
